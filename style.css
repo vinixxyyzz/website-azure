@@ -1,58 +1,78 @@
 /* styles.css */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
-    color: #333;
     margin: 0;
-    padding: 0;
-}
-
-header {
-    background-color: #6a6a6a;
-    color: white;
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(to right, #ffcc70, #ff8c70);
+    color: #333;
+  }
+  
+  header {
+    background: #fff;
+    padding: 1em;
     text-align: center;
-    padding: 20px;
-}
-
-header h1 {
-    font-size: 3em;
-}
-
-section {
-    padding: 20px;
-    margin: 20px;
-    background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-section h2 {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  
+  header h1 {
     font-size: 2em;
-    color: #4CAF50;
-}
-
-footer {
-    text-align: center;
-    padding: 10px;
-    background-color: #333;
+    margin: 0;
+  }
+  
+  nav button {
+    margin: 0 10px;
+    padding: 0.5em 1em;
+    border: none;
+    background-color: #ff704d;
     color: white;
-}
-
-p {
-    line-height: 1.6;
-}
-
-/* Adicionando um estilo de responsividade para dispositivos móveis */
-@media (max-width: 600px) {
-    body {
-        padding: 10px;
-    }
-    
-    header h1 {
-        font-size: 2em;
-    }
-    
-    section h2 {
-        font-size: 1.5em;
-    }
-}
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  
+  main {
+    padding: 2em;
+    text-align: center;
+  }
+  
+  section#auth > div {
+    margin: 1em auto;
+    background-color: white;
+    padding: 1.5em;
+    border-radius: 12px;
+    max-width: 300px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  }
+  
+  input {
+    display: block;
+    margin: 0.5em auto;
+    padding: 0.5em;
+    width: 80%;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+  }
+  
+  button {
+    margin-top: 0.5em;
+    padding: 0.6em 1.2em;
+    background-color: #ff704d;
+    border: none;
+    color: white;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #e65c3a;
+  }
+  
+  #games .game-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1em;
+    margin-top: 1.5em;
+  }
+  
+  #games .game-buttons button {
+    font-size: 1.2em;
+  }
+  
