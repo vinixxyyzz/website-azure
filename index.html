@@ -4,170 +4,141 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TortinhosBet - Cassino Online</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Luckiest Guy', cursive;
+      background-color: #0f0f0f;
+      color: #00ff88;
+    }
+
+    header {
+      background-color: #000;
+      padding: 20px;
+      text-align: left;
+      font-size: 2rem;
+      color: #00ff88;
+      position: sticky;
+      top: 0;
+      z-index: 999;
+    }
+
+    section {
+      padding: 60px 20px;
+      max-width: 900px;
+      margin: auto;
+    }
+
+    h2 {
+      color: #00ff88;
+    }
+
+    input[type="number"] {
+      padding: 10px;
+      border-radius: 5px;
+      border: none;
+      margin-right: 10px;
+    }
+
+    button {
+      background-color: #00ff88;
+      color: black;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background-color: #00cc66;
+    }
+
+    .game-section {
+      background-color: #1a1a1a;
+      border-radius: 15px;
+      padding: 30px;
+      margin-bottom: 40px;
+      box-shadow: 0 0 15px #00ff8866;
+    }
+  </style>
 </head>
 <body>
   <header>
-    <h1>🎉 TortinhosBet 🎰</h1>
-    <nav>
-      <button onclick="showLogin()">Login</button>
-      <button onclick="showRegister()">Cadastro</button>
-      <span id="user-info"></span>
-    </nav>
+    TortinhosBet
   </header>
 
-  <main>
-    <section id="auth">
-      <div id="login">
-        <h2>Login</h2>
-        <input type="text" id="login-user" placeholder="Usuário" />
-        <input type="password" id="login-pass" placeholder="Senha" />
-        <button onclick="login()">Entrar</button>
-      </div>
-      <div id="register">
-        <h2>Cadastro</h2>
-        <input type="text" id="register-user" placeholder="Usuário" />
-        <input type="password" id="register-pass" placeholder="Senha" />
-        <button onclick="register()">Cadastrar</button>
-      </div>
-    </section>
+  <section class="game-section" id="mines">
+    <h2>💣 Mines</h2>
+    <p>Escolha quanto quer apostar e clique em Jogar!</p>
+    <input type="number" id="mines-bet" placeholder="Valor da aposta" min="1" />
+    <button onclick="startMinesGame()">Jogar</button>
+    <div id="mines-result" style="margin-top: 1em;"></div>
+  </section>
 
-    <section id="games" style="display: none">
-      <h2>Bem-vindo ao TortinhosBet!</h2>
-      <p>Saldo: R$ <span id="balance">0</span></p>
-      <div class="game-buttons">
-        <button onclick="playMines()">💣 Mines</button>
-        <button onclick="playRoleta()">🐯 Roleta do Tigrinho</button>
-        <button onclick="playAviator()">✈️ Aviator</button>
-        <button onclick="openShop()">🛒 Loja</button>
-      </div>
-      <div id="game-container"></div>
-      <div id="shop" style="margin-top:2em;"></div>
-    </section>
-  </main>
+  <section class="game-section" id="roleta">
+    <h2>🐯 Roleta do Tigrinho</h2>
+    <p>Escolha quanto apostar e clique para girar!</p>
+    <input type="number" id="roleta-bet" placeholder="Valor da aposta" min="1" />
+    <button onclick="startRoletaGame()">Girar</button>
+    <div id="roleta-result" style="margin-top: 1em;"></div>
+  </section>
+
+  <section class="game-section" id="aviator">
+    <h2>✈️ Aviator</h2>
+    <p>Escolha quanto apostar e clique para decolar!</p>
+    <input type="number" id="aviator-bet" placeholder="Valor da aposta" min="1" />
+    <button onclick="startAviatorGame()">Decolar</button>
+    <div id="aviator-result" style="margin-top: 1em;"></div>
+  </section>
 
   <script>
-    let users = JSON.parse(localStorage.getItem('users')) || {};
-    let currentUser = localStorage.getItem('currentUser') || null;
+    let currentUser = "Jogador";
+    let users = {
+      Jogador: {
+        balance: 1000,
+      },
+    };
 
-    function showLogin() {
-      document.getElementById('login').style.display = 'block';
-      document.getElementById('register').style.display = 'none';
-    }
-
-    function showRegister() {
-      document.getElementById('login').style.display = 'none';
-      document.getElementById('register').style.display = 'block';
-    }
-
-    function register() {
-      const user = document.getElementById('register-user').value;
-      const pass = document.getElementById('register-pass').value;
-      if (!users[user]) {
-        users[user] = { password: pass, balance: 1000, items: [] };
-        localStorage.setItem('users', JSON.stringify(users));
-        alert('Cadastro realizado com sucesso! Você ganhou R$1000 de bônus.');
-        showLogin();
+    function startMinesGame() {
+      const bet = parseFloat(document.getElementById("mines-bet").value);
+      const resultEl = document.getElementById("mines-result");
+      if (isNaN(bet) || bet <= 0) return resultEl.innerHTML = "Digite um valor válido.";
+      if (bet > users[currentUser].balance) return resultEl.innerHTML = "Saldo insuficiente!";
+      const win = Math.random() < 0.5;
+      if (win) {
+        users[currentUser].balance += bet;
+        resultEl.innerHTML = `🎉 Você ganhou R$${bet.toFixed(2)}!`;
       } else {
-        alert('Usuário já existe.');
+        users[currentUser].balance -= bet;
+        resultEl.innerHTML = `💥 Você perdeu R$${bet.toFixed(2)}.`;
       }
     }
 
-    function login() {
-      const user = document.getElementById('login-user').value;
-      const pass = document.getElementById('login-pass').value;
-      if (users[user] && users[user].password === pass) {
-        currentUser = user;
-        localStorage.setItem('currentUser', user);
-        updateUI();
-      } else {
-        alert('Usuário ou senha incorretos.');
-      }
+    function startRoletaGame() {
+      const bet = parseFloat(document.getElementById("roleta-bet").value);
+      const resultEl = document.getElementById("roleta-result");
+      if (isNaN(bet) || bet <= 0) return resultEl.innerHTML = "Digite um valor válido.";
+      if (bet > users[currentUser].balance) return resultEl.innerHTML = "Saldo insuficiente!";
+      const prizeMultiplier = [0, 0.5, 1, 2, 5, 10];
+      const resultIndex = Math.floor(Math.random() * prizeMultiplier.length);
+      const multiplier = prizeMultiplier[resultIndex];
+      const resultAmount = bet * multiplier;
+      users[currentUser].balance = users[currentUser].balance - bet + resultAmount;
+      resultEl.innerHTML = `🎰 Resultado: x${multiplier}<br>Você ganhou R$${resultAmount.toFixed(2)}!`;
     }
 
-    function updateUI() {
-      document.getElementById('auth').style.display = 'none';
-      document.getElementById('games').style.display = 'block';
-      document.getElementById('user-info').textContent = `Logado como: ${currentUser}`;
-      document.getElementById('balance').textContent = users[currentUser].balance;
+    function startAviatorGame() {
+      const bet = parseFloat(document.getElementById("aviator-bet").value);
+      const resultEl = document.getElementById("aviator-result");
+      if (isNaN(bet) || bet <= 0) return resultEl.innerHTML = "Digite um valor válido.";
+      if (bet > users[currentUser].balance) return resultEl.innerHTML = "Saldo insuficiente!";
+      const multiplier = (Math.random() * 10 + 1).toFixed(2);
+      const resultAmount = bet * multiplier;
+      users[currentUser].balance = users[currentUser].balance - bet + resultAmount;
+      resultEl.innerHTML = `✈️ O avião subiu até x${multiplier}!<br>Você ganhou R$${resultAmount.toFixed(2)}!`;
     }
-
-    function updateBalanceDisplay() {
-      document.getElementById('balance').textContent = users[currentUser].balance;
-      localStorage.setItem('users', JSON.stringify(users));
-    }
-
-    function playMines() {
-      const bet = 50;
-      if (users[currentUser].balance >= bet) {
-        const win = Math.random() < 0.5;
-        users[currentUser].balance += win ? bet : -bet;
-        updateBalanceDisplay();
-        alert(win ? 'Você ganhou no Mines!' : 'Você perdeu no Mines!');
-      } else {
-        alert('Saldo insuficiente.');
-      }
-    }
-
-    function playRoleta() {
-      const bet = 50;
-      if (users[currentUser].balance >= bet) {
-        const result = Math.random();
-        let message = '';
-        if (result < 0.3) {
-          users[currentUser].balance += bet * 2;
-          message = '🎯 Ganhou na Roleta do Tigrinho!';
-        } else {
-          users[currentUser].balance -= bet;
-          message = '💔 Perdeu na Roleta do Tigrinho!';
-        }
-        updateBalanceDisplay();
-        alert(message);
-      } else {
-        alert('Saldo insuficiente.');
-      }
-    }
-
-    function playAviator() {
-      const bet = 100;
-      if (users[currentUser].balance >= bet) {
-        const multiplier = (Math.random() * 2 + 1).toFixed(2);
-        users[currentUser].balance += Math.floor(bet * (multiplier - 1));
-        updateBalanceDisplay();
-        alert(`✈️ Aviator decolou com multiplicador ${multiplier}x!`);
-      } else {
-        alert('Saldo insuficiente.');
-      }
-    }
-
-    function openShop() {
-      const shopItems = [
-        { name: 'Camiseta Tortinhos', price: 300 },
-        { name: 'Moeda Especial', price: 150 },
-        { name: 'Avatar Personalizado', price: 500 }
-      ];
-      const shopDiv = document.getElementById('shop');
-      shopDiv.innerHTML = '<h3>🛍️ Loja</h3>';
-      shopItems.forEach(item => {
-        const button = document.createElement('button');
-        button.textContent = `Comprar ${item.name} - R$${item.price}`;
-        button.onclick = () => buyItem(item);
-        shopDiv.appendChild(button);
-      });
-    }
-
-    function buyItem(item) {
-      if (users[currentUser].balance >= item.price) {
-        users[currentUser].balance -= item.price;
-        users[currentUser].items.push(item.name);
-        updateBalanceDisplay();
-        alert(`Você comprou: ${item.name}`);
-      } else {
-        alert('Saldo insuficiente para comprar este item.');
-      }
-    }
-
-    if (currentUser) updateUI();
   </script>
 </body>
 </html>
