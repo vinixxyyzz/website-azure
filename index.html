@@ -24,21 +24,16 @@
       z-index: 999;
     }
 
-    section {
-      padding: 60px 20px;
-      max-width: 900px;
-      margin: auto;
+    #auth {
+      padding: 40px;
+      text-align: center;
     }
 
-    h2 {
-      color: #00ff88;
-    }
-
-    input[type="number"] {
+    input {
+      margin: 5px;
       padding: 10px;
       border-radius: 5px;
       border: none;
-      margin-right: 10px;
     }
 
     button {
@@ -51,16 +46,23 @@
       font-weight: bold;
     }
 
-    button:hover {
-      background-color: #00cc66;
+    #user-info {
+      padding: 10px;
+      text-align: right;
+      font-size: 1rem;
+    }
+
+    #games, .game-section {
+      max-width: 800px;
+      margin: auto;
+      padding: 40px 20px;
     }
 
     .game-section {
       background-color: #1a1a1a;
       border-radius: 15px;
-      padding: 30px;
-      margin-bottom: 40px;
       box-shadow: 0 0 15px #00ff8866;
+      margin-bottom: 40px;
     }
   </style>
 </head>
@@ -69,37 +71,94 @@
     TortinhosBet
   </header>
 
-  <section class="game-section" id="mines">
-    <h2>💣 Mines</h2>
-    <p>Escolha quanto quer apostar e clique em Jogar!</p>
-    <input type="number" id="mines-bet" placeholder="Valor da aposta" min="1" />
-    <button onclick="startMinesGame()">Jogar</button>
-    <div id="mines-result" style="margin-top: 1em;"></div>
-  </section>
+  <div id="auth">
+    <div id="login">
+      <h2>Login</h2>
+      <input id="login-user" placeholder="Usuário"><br>
+      <input type="password" id="login-pass" placeholder="Senha"><br>
+      <button onclick="login()">Entrar</button>
+      <p><a href="#" onclick="showRegister()">Não tem conta? Cadastre-se</a></p>
+    </div>
+    <div id="register" style="display:none">
+      <h2>Cadastro</h2>
+      <input id="register-user" placeholder="Usuário"><br>
+      <input type="password" id="register-pass" placeholder="Senha"><br>
+      <button onclick="register()">Cadastrar</button>
+      <p><a href="#" onclick="showLogin()">Já tem conta? Login</a></p>
+    </div>
+  </div>
 
-  <section class="game-section" id="roleta">
-    <h2>🐯 Roleta do Tigrinho</h2>
-    <p>Escolha quanto apostar e clique para girar!</p>
-    <input type="number" id="roleta-bet" placeholder="Valor da aposta" min="1" />
-    <button onclick="startRoletaGame()">Girar</button>
-    <div id="roleta-result" style="margin-top: 1em;"></div>
-  </section>
+  <div id="user-info"></div>
 
-  <section class="game-section" id="aviator">
-    <h2>✈️ Aviator</h2>
-    <p>Escolha quanto apostar e clique para decolar!</p>
-    <input type="number" id="aviator-bet" placeholder="Valor da aposta" min="1" />
-    <button onclick="startAviatorGame()">Decolar</button>
-    <div id="aviator-result" style="margin-top: 1em;"></div>
-  </section>
+  <div id="games" style="display:none">
+    <div class="game-section" id="mines">
+      <h2>💣 Mines</h2>
+      <p>Escolha quanto quer apostar e clique em Jogar!</p>
+      <input type="number" id="mines-bet" placeholder="Valor da aposta" min="1" />
+      <button onclick="startMinesGame()">Jogar</button>
+      <div id="mines-result" style="margin-top: 1em;"></div>
+    </div>
+
+    <div class="game-section" id="roleta">
+      <h2>🐯 Roleta do Tigrinho</h2>
+      <p>Escolha quanto apostar e clique para girar!</p>
+      <input type="number" id="roleta-bet" placeholder="Valor da aposta" min="1" />
+      <button onclick="startRoletaGame()">Girar</button>
+      <div id="roleta-result" style="margin-top: 1em;"></div>
+    </div>
+
+    <div class="game-section" id="aviator">
+      <h2>✈️ Aviator</h2>
+      <p>Escolha quanto apostar e clique para decolar!</p>
+      <input type="number" id="aviator-bet" placeholder="Valor da aposta" min="1" />
+      <button onclick="startAviatorGame()">Decolar</button>
+      <div id="aviator-result" style="margin-top: 1em;"></div>
+    </div>
+
+    <div style="text-align:center">
+      <strong>Saldo: R$<span id="balance">0.00</span></strong>
+    </div>
+  </div>
 
   <script>
-    let currentUser = "Jogador";
-    let users = {
-      Jogador: {
-        balance: 1000,
-      },
-    };
+    let currentUser = null;
+    let users = {};
+
+    function showLogin() {
+      document.getElementById("login").style.display = "block";
+      document.getElementById("register").style.display = "none";
+    }
+
+    function showRegister() {
+      document.getElementById("register").style.display = "block";
+      document.getElementById("login").style.display = "none";
+    }
+
+    function login() {
+      const user = document.getElementById("login-user").value;
+      const pass = document.getElementById("login-pass").value;
+      if (users[user] && users[user].password === pass) {
+        currentUser = user;
+        document.getElementById("games").style.display = "block";
+        document.getElementById("auth").style.display = "none";
+        document.getElementById("balance").textContent = users[user].balance.toFixed(2);
+        document.getElementById("user-info").textContent = `👤 ${user}`;
+      } else {
+        alert("Usuário ou senha incorretos!");
+      }
+    }
+
+    function register() {
+      const user = document.getElementById("register-user").value;
+      const pass = document.getElementById("register-pass").value;
+      if (!users[user]) {
+        users[user] = { password: pass, balance: 1000 };
+        alert("Cadastro realizado com sucesso!");
+        showLogin();
+      } else {
+        alert("Usuário já existe!");
+      }
+    }
 
     function startMinesGame() {
       const bet = parseFloat(document.getElementById("mines-bet").value);
@@ -114,6 +173,7 @@
         users[currentUser].balance -= bet;
         resultEl.innerHTML = `💥 Você perdeu R$${bet.toFixed(2)}.`;
       }
+      document.getElementById("balance").textContent = users[currentUser].balance.toFixed(2);
     }
 
     function startRoletaGame() {
@@ -127,6 +187,7 @@
       const resultAmount = bet * multiplier;
       users[currentUser].balance = users[currentUser].balance - bet + resultAmount;
       resultEl.innerHTML = `🎰 Resultado: x${multiplier}<br>Você ganhou R$${resultAmount.toFixed(2)}!`;
+      document.getElementById("balance").textContent = users[currentUser].balance.toFixed(2);
     }
 
     function startAviatorGame() {
@@ -138,6 +199,7 @@
       const resultAmount = bet * multiplier;
       users[currentUser].balance = users[currentUser].balance - bet + resultAmount;
       resultEl.innerHTML = `✈️ O avião subiu até x${multiplier}!<br>Você ganhou R$${resultAmount.toFixed(2)}!`;
+      document.getElementById("balance").textContent = users[currentUser].balance.toFixed(2);
     }
   </script>
 </body>
