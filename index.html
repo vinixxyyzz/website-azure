@@ -79,6 +79,10 @@
       color: #000;
       font-weight: bold;
     }
+    .cell.bomb {
+      background-color: red;
+      color: white;
+    }
     canvas {
       display: block;
       margin: 1rem auto;
@@ -180,11 +184,11 @@
         const cell = document.createElement("div");
         cell.className = "cell";
         cell.onclick = () => {
-          if (cell.classList.contains("revealed")) return;
+          if (cell.classList.contains("revealed") || cell.classList.contains("bomb")) return;
           if (minePositions[i]) {
-            cell.textContent = "💥";
+            cell.classList.add("bomb");
+            cell.textContent = "💣";
             alert("Você perdeu!");
-            startMinesGame();
             return;
           }
           cell.classList.add("revealed");
@@ -195,6 +199,7 @@
         grid.appendChild(cell);
       }
     }
+
     function withdrawMines() {
       alert("Retirada realizada!");
       startMinesGame();
