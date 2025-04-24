@@ -8,7 +8,7 @@
     body {
       margin: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #0a0a0a;
+      background-color: #000;
       color: #0f0;
     }
     header {
@@ -16,6 +16,10 @@
       padding: 1rem 2rem;
       font-size: 2rem;
       font-weight: bold;
+      color: #0f0;
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
     .container {
       padding: 2rem;
@@ -43,21 +47,24 @@
     }
     .user-info {
       text-align: right;
-      padding: 1rem;
+      padding: 1rem 2rem;
+      color: #0f0;
     }
     .game-section {
       padding: 2rem;
       border-top: 2px solid #0f0;
       margin-top: 2rem;
+      background-color: #111;
+      border-radius: 12px;
     }
-    .mines-grid {
+    .mines-grid, .roleta-grid {
       display: grid;
       grid-template-columns: repeat(6, 50px);
       grid-gap: 10px;
       justify-content: center;
       margin-top: 1rem;
     }
-    .cell {
+    .cell, .roleta-cell {
       width: 50px;
       height: 50px;
       background-color: #222;
@@ -67,10 +74,16 @@
       border: 1px solid #0f0;
       cursor: pointer;
     }
-    .cell.revealed {
+    .cell.revealed, .roleta-cell.active {
       background-color: #0f0;
       color: #000;
       font-weight: bold;
+    }
+    canvas {
+      display: block;
+      margin: 1rem auto;
+      background: #111;
+      border: 1px solid #0f0;
     }
   </style>
 </head>
@@ -97,41 +110,19 @@
       <button onclick="startMinesGame()">Iniciar Jogo</button>
       <div class="mines-grid" id="mines-grid"></div>
     </div>
+
+    <div class="game-section" id="roleta-game">
+      <h2>🎰 Roleta do Tigrinho</h2>
+      <button onclick="girarRoleta()">Girar</button>
+      <div class="roleta-grid" id="roleta-grid"></div>
+    </div>
+
+    <div class="game-section" id="aviator-game">
+      <h2>🛫 Aviator</h2>
+      <button onclick="startAviator()">Iniciar Voo</button>
+      <canvas id="aviator-canvas" width="300" height="200"></canvas>
+    </div>
   </div>
-
-  <audio id="sound-win" src="https://cdn.pixabay.com/audio/2022/03/15/audio_42b29f6942.mp3"></audio>
-  <audio id="sound-lose" src="https://cdn.pixabay.com/audio/2022/03/15/audio_9dfe2f41e3.mp3"></audio>
-  <audio id="sound-click" src="https://cdn.pixabay.com/audio/2022/03/15/audio_84df1a6a91.mp3"></audio>
-
-  <style>
-    .animate-glow {
-      animation: glow 1s ease-in-out infinite alternate;
-    }
-
-    @keyframes glow {
-      from {
-        box-shadow: 0 0 5px #0f0, 0 0 10px #0f0;
-      }
-      to {
-        box-shadow: 0 0 20px #0f0, 0 0 30px #0f0;
-      }
-    }
-
-    .sparkle {
-      position: absolute;
-      width: 10px;
-      height: 10px;
-      background: yellow;
-      border-radius: 50%;
-      pointer-events: none;
-      animation: sparkle 1s ease-out forwards;
-    }
-
-    @keyframes sparkle {
-      0% { opacity: 1; transform: scale(1); }
-      100% { opacity: 0; transform: scale(2) translateY(-20px); }
-    }
-  </style>
 
   <script>
     const users = {};
@@ -189,13 +180,43 @@
       if (minePositions.includes(index)) {
         cell.textContent = "💣";
         cell.style.background = "red";
-        document.getElementById("sound-lose").play();
-        alert("Você clicou em uma mina!");
       } else {
         cell.textContent = "💎";
         cell.classList.add("revealed");
-        document.getElementById("sound-click").play();
       }
+    }
+
+    // ROLETA DO TIGRINHO
+    function girarRoleta() {
+      const grid = document.getElementById("roleta-grid");
+      grid.innerHTML = "";
+      let simbolos = ["🐯", "🍒", "💰", "⭐", "7️⃣", "🍇"];
+      let resultados = [];
+      for (let i = 0; i < 6; i++) {
+        let sorteado = simbolos[Math.floor(Math.random() * simbolos.length)];
+        resultados.push(sorteado);
+        let cell = document.createElement("div");
+        cell.classList.add("roleta-cell");
+        cell.textContent = sorteado;
+        grid.appendChild(cell);
+      }
+    }
+
+    // AVIATOR
+    function startAviator() {
+      const canvas = document.getElementById("aviator-canvas");
+      const ctx = canvas.getContext("2d");
+      let x = 0;
+      let y = canvas.height;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const interval = setInterval(() => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#0f0";
+        ctx.fillText("✈️", x, y);
+        x += 2;
+        y -= 1.5;
+        if (x > canvas.width || y < 0) clearInterval(interval);
+      }, 30);
     }
   </script>
 </body>
