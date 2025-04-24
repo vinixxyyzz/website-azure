@@ -8,7 +8,7 @@
     body {
       margin: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #000;
+      background-color: #0a0a0a;
       color: #0f0;
     }
     header {
@@ -16,10 +16,6 @@
       padding: 1rem 2rem;
       font-size: 2rem;
       font-weight: bold;
-      color: #0f0;
-      position: sticky;
-      top: 0;
-      z-index: 10;
     }
     .container {
       padding: 2rem;
@@ -47,19 +43,16 @@
     }
     .user-info {
       text-align: right;
-      padding: 1rem 2rem;
-      color: #0f0;
+      padding: 1rem;
     }
     .game-section {
       padding: 2rem;
       border-top: 2px solid #0f0;
       margin-top: 2rem;
-      background-color: #111;
-      border-radius: 12px;
     }
     .mines-grid, .roleta-grid {
       display: grid;
-      grid-template-columns: repeat(6, 50px);
+      grid-template-columns: repeat(5, 50px);
       grid-gap: 10px;
       justify-content: center;
       margin-top: 1rem;
@@ -83,7 +76,16 @@
       display: block;
       margin: 1rem auto;
       background: #111;
-      border: 1px solid #0f0;
+    }
+    .withdraw-button {
+      background-color: #0f0;
+      color: #000;
+      font-weight: bold;
+      padding: 0.5rem 1rem;
+      margin-top: 1rem;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -106,19 +108,22 @@
     <div class="game-section" id="mines-game">
       <h2>💣 Mines</h2>
       <label for="mine-count">Quantidade de minas:</label>
-      <input type="number" id="mine-count" value="5" min="1" max="35">
+      <input type="number" id="mine-count" value="5" min="1" max="24">
       <button onclick="startMinesGame()">Iniciar Jogo</button>
       <div class="mines-grid" id="mines-grid"></div>
+      <button class="withdraw-button" onclick="withdrawMines()">Retirar</button>
     </div>
 
     <div class="game-section" id="roleta-game">
       <h2>🎰 Roleta do Tigrinho</h2>
+      <p>Multiplicador aleatório: <span id="roleta-mult">1x</span></p>
       <button onclick="girarRoleta()">Girar</button>
       <div class="roleta-grid" id="roleta-grid"></div>
     </div>
 
     <div class="game-section" id="aviator-game">
       <h2>🛫 Aviator</h2>
+      <p>Multiplicador: <span id="aviator-mult">1.00x</span></p>
       <button onclick="startAviator()">Iniciar Voo</button>
       <canvas id="aviator-canvas" width="300" height="200"></canvas>
     </div>
@@ -127,6 +132,7 @@
   <script>
     const users = {};
     let currentUser = null;
+    let minesMultiplier = 1;
 
     function login() {
       const username = document.getElementById("username").value;
@@ -158,8 +164,9 @@
       const grid = document.getElementById("mines-grid");
       grid.innerHTML = "";
       revealed = [];
+      minesMultiplier = 1;
       const mineCount = parseInt(document.getElementById("mine-count").value);
-      const totalCells = 36;
+      const totalCells = 25;
       minePositions = [];
       while (minePositions.length < mineCount) {
         let pos = Math.floor(Math.random() * totalCells);
@@ -180,9 +187,22 @@
       if (minePositions.includes(index)) {
         cell.textContent = "💣";
         cell.style.background = "red";
+        alert("Você perdeu! Jogo encerrado.");
+        startMinesGame();
       } else {
         cell.textContent = "💎";
         cell.classList.add("revealed");
+        minesMultiplier += 0.2;
+      }
+    }
+
+    function withdrawMines() {
+      if (currentUser) {
+        let ganho = 10 * minesMultiplier;
+        users[currentUser].balance += ganho;
+        document.getElementById("balance").textContent = users[currentUser].balance.toFixed(2);
+        alert(`Você retirou R$${ganho.toFixed(2)}!`);
+        startMinesGame();
       }
     }
 
@@ -190,15 +210,24 @@
     function girarRoleta() {
       const grid = document.getElementById("roleta-grid");
       grid.innerHTML = "";
-      let simbolos = ["🐯", "🍒", "💰", "⭐", "7️⃣", "🍇"];
-      let resultados = [];
+      const simbolos = ["🐯", "🍒", "💰", "⭐", "7️⃣", "🍇"];
+      let mult = Math.floor(Math.random() * 10) + 1;
+      document.getElementById("roleta-mult").textContent = `${mult}x`;
       for (let i = 0; i < 6; i++) {
-        let sorteado = simbolos[Math.floor(Math.random() * simbolos.length)];
-        resultados.push(sorteado);
-        let cell = document.createElement("div");
+        const sorteado = simbolos[Math.floor(Math.random() * simbolos.length)];
+        const cell = document.createElement("div");
         cell.classList.add("roleta-cell");
         cell.textContent = sorteado;
         grid.appendChild(cell);
+      }
+      if (currentUser && Math.random() > 0.5) {
+        users[currentUser].balance += 10 * mult;
+        document.getElementById("balance").textContent = users[currentUser].balance.toFixed(2);
+        alert(`Você ganhou R$${(10 * mult).toFixed(2)}!`);
+      } else if (currentUser) {
+        users[currentUser].balance -= 10;
+        document.getElementById("balance").textContent = users[currentUser].balance.toFixed(2);
+        alert("Você perdeu R$10!");
       }
     }
 
@@ -209,14 +238,33 @@
       let x = 0;
       let y = canvas.height;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let mult = 1.0;
+      document.getElementById("aviator-mult").textContent = `${mult.toFixed(2)}x`;
       const interval = setInterval(() => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = "#0f0";
         ctx.fillText("✈️", x, y);
         x += 2;
         y -= 1.5;
-        if (x > canvas.width || y < 0) clearInterval(interval);
-      }, 30);
+        mult += 0.05;
+        document.getElementById("aviator-mult").textContent = `${mult.toFixed(2)}x`;
+        if (x > canvas.width || y < 0) {
+          clearInterval(interval);
+          if (currentUser) {
+            let ganhou = 10 * mult;
+            users[currentUser].balance += ganhou;
+            document.getElementById("balance").textContent = users[currentUser].balance.toFixed(2);
+            alert(`Você ganhou R$${ganhou.toFixed(2)}!`);
+          }
+        } else if (Math.random() < 0.01) {
+          clearInterval(interval);
+          if (currentUser) {
+            users[currentUser].balance -= 10;
+            document.getElementById("balance").textContent = users[currentUser].balance.toFixed(2);
+            alert("O avião caiu! Você perdeu R$10!");
+          }
+        }
+      }, 100);
     }
   </script>
 </body>
