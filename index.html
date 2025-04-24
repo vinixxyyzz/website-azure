@@ -5,121 +5,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TortinhosBet - Cassino Online</title>
   <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet">
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Luckiest Guy', cursive;
-      background-color: #0f0f0f;
-      color: #00ff88;
-    }
-
-    header {
-      background-color: #000;
-      padding: 20px;
-      text-align: left;
-      font-size: 2rem;
-      color: #00ff88;
-      position: sticky;
-      top: 0;
-      z-index: 999;
-    }
-
-    #auth {
-      padding: 40px;
-      text-align: center;
-    }
-
-    input {
-      margin: 5px;
-      padding: 10px;
-      border-radius: 5px;
-      border: none;
-    }
-
-    button {
-      background-color: #00ff88;
-      color: black;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    #user-info {
-      padding: 10px;
-      text-align: right;
-      font-size: 1rem;
-    }
-
-    #games, .game-section {
-      max-width: 800px;
-      margin: auto;
-      padding: 40px 20px;
-    }
-
-    .game-section {
-      background-color: #1a1a1a;
-      border-radius: 15px;
-      box-shadow: 0 0 15px #00ff8866;
-      margin-bottom: 40px;
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header>
-    TortinhosBet
-  </header>
-
   <div id="auth">
-    <div id="login">
-      <h2>Login</h2>
-      <input id="login-user" placeholder="Usuário"><br>
-      <input type="password" id="login-pass" placeholder="Senha"><br>
-      <button onclick="login()">Entrar</button>
-      <p><a href="#" onclick="showRegister()">Não tem conta? Cadastre-se</a></p>
-    </div>
-    <div id="register" style="display:none">
+    <h1>TortinhosBet</h1>
+    <div id="register">
       <h2>Cadastro</h2>
-      <input id="register-user" placeholder="Usuário"><br>
-      <input type="password" id="register-pass" placeholder="Senha"><br>
+      <input id="register-user" placeholder="Usuário" />
+      <input id="register-pass" type="password" placeholder="Senha" />
       <button onclick="register()">Cadastrar</button>
-      <p><a href="#" onclick="showLogin()">Já tem conta? Login</a></p>
+      <p>Já tem conta? <a href="#" onclick="showLogin()">Login</a></p>
+    </div>
+    <div id="login" style="display:none">
+      <h2>Login</h2>
+      <input id="login-user" placeholder="Usuário" />
+      <input id="login-pass" type="password" placeholder="Senha" />
+      <button onclick="login()">Entrar</button>
+      <p>Não tem conta? <a href="#" onclick="showRegister()">Cadastre-se</a></p>
     </div>
   </div>
-
-  <div id="user-info"></div>
-
   <div id="games" style="display:none">
-    <div class="game-section" id="mines">
-      <h2>💣 Mines</h2>
-      <p>Escolha quanto quer apostar e clique em Jogar!</p>
-      <input type="number" id="mines-bet" placeholder="Valor da aposta" min="1" />
-      <button onclick="startMinesGame()">Jogar</button>
-      <div id="mines-result" style="margin-top: 1em;"></div>
-    </div>
-
-    <div class="game-section" id="roleta">
-      <h2>🐯 Roleta do Tigrinho</h2>
-      <p>Escolha quanto apostar e clique para girar!</p>
-      <input type="number" id="roleta-bet" placeholder="Valor da aposta" min="1" />
-      <button onclick="startRoletaGame()">Girar</button>
-      <div id="roleta-result" style="margin-top: 1em;"></div>
-    </div>
-
-    <div class="game-section" id="aviator">
-      <h2>✈️ Aviator</h2>
-      <p>Escolha quanto apostar e clique para decolar!</p>
-      <input type="number" id="aviator-bet" placeholder="Valor da aposta" min="1" />
-      <button onclick="startAviatorGame()">Decolar</button>
-      <div id="aviator-result" style="margin-top: 1em;"></div>
-    </div>
-
-    <div style="text-align:center">
-      <strong>Saldo: R$<span id="balance">0.00</span></strong>
-    </div>
+    <header>
+      <span id="user-info"></span>
+      <span>Saldo: R$<span id="balance">0</span></span>
+    </header>
+    <nav>
+      <button onclick="playMines()">💣 Mines</button>
+      <button onclick="playRoleta()">🐯 Roleta do Tigrinho</button>
+      <button onclick="playAviator()">✈️ Aviator</button>
+    </nav>
+    <main id="game-container"></main>
   </div>
-
   <script>
     let currentUser = null;
     let users = {};
@@ -160,46 +77,89 @@
       }
     }
 
+    function playMines() {
+      const gameContainer = document.getElementById("game-container");
+      gameContainer.innerHTML = `
+        <h3>💣 Mines (6x6)</h3>
+        <p>Escolha quanto quer apostar e o número de minas:</p>
+        <input type="number" id="mines-bet" placeholder="Valor da aposta" min="1" />
+        <input type="number" id="mines-count" placeholder="Nº de minas (1-20)" min="1" max="20" />
+        <button onclick="startMinesGame()">Começar</button>
+        <div id="mines-board" style="display:grid; grid-template-columns:repeat(6, 50px); gap:5px; margin-top:10px;"></div>
+        <div id="mines-result" style="margin-top: 1em;"></div>
+      `;
+    }
+
+    let minesData = [];
+    let revealedCells = 0;
     function startMinesGame() {
       const bet = parseFloat(document.getElementById("mines-bet").value);
+      const minesCount = parseInt(document.getElementById("mines-count").value);
       const resultEl = document.getElementById("mines-result");
-      if (isNaN(bet) || bet <= 0) return resultEl.innerHTML = "Digite um valor válido.";
-      if (bet > users[currentUser].balance) return resultEl.innerHTML = "Saldo insuficiente!";
-      const win = Math.random() < 0.5;
-      if (win) {
-        users[currentUser].balance += bet;
-        resultEl.innerHTML = `🎉 Você ganhou R$${bet.toFixed(2)}!`;
-      } else {
-        users[currentUser].balance -= bet;
-        resultEl.innerHTML = `💥 Você perdeu R$${bet.toFixed(2)}.`;
+
+      if (isNaN(bet) || bet <= 0 || isNaN(minesCount) || minesCount < 1 || minesCount > 20) {
+        resultEl.innerHTML = "Valores inválidos.";
+        return;
       }
+
+      if (bet > users[currentUser].balance) {
+        resultEl.innerHTML = "Saldo insuficiente!";
+        return;
+      }
+
+      users[currentUser].balance -= bet;
       document.getElementById("balance").textContent = users[currentUser].balance.toFixed(2);
+      minesData = Array(36).fill(false);
+      revealedCells = 0;
+
+      let minePositions = new Set();
+      while (minePositions.size < minesCount) {
+        minePositions.add(Math.floor(Math.random() * 36));
+      }
+      minePositions.forEach(pos => minesData[pos] = true);
+
+      const board = document.getElementById("mines-board");
+      board.innerHTML = "";
+
+      for (let i = 0; i < 36; i++) {
+        const cell = document.createElement("button");
+        cell.style.width = "50px";
+        cell.style.height = "50px";
+        cell.textContent = "❓";
+        cell.onclick = () => revealCell(i, bet);
+        board.appendChild(cell);
+      }
+
+      resultEl.innerHTML = "Boa sorte!";
     }
 
-    function startRoletaGame() {
-      const bet = parseFloat(document.getElementById("roleta-bet").value);
-      const resultEl = document.getElementById("roleta-result");
-      if (isNaN(bet) || bet <= 0) return resultEl.innerHTML = "Digite um valor válido.";
-      if (bet > users[currentUser].balance) return resultEl.innerHTML = "Saldo insuficiente!";
-      const prizeMultiplier = [0, 0.5, 1, 2, 5, 10];
-      const resultIndex = Math.floor(Math.random() * prizeMultiplier.length);
-      const multiplier = prizeMultiplier[resultIndex];
-      const resultAmount = bet * multiplier;
-      users[currentUser].balance = users[currentUser].balance - bet + resultAmount;
-      resultEl.innerHTML = `🎰 Resultado: x${multiplier}<br>Você ganhou R$${resultAmount.toFixed(2)}!`;
-      document.getElementById("balance").textContent = users[currentUser].balance.toFixed(2);
+    function revealCell(index, bet) {
+      const board = document.getElementById("mines-board");
+      const resultEl = document.getElementById("mines-result");
+      const cell = board.children[index];
+      if (cell.disabled) return;
+
+      if (minesData[index]) {
+        cell.textContent = "💣";
+        resultEl.innerHTML = "💥 Você perdeu tudo!";
+        Array.from(board.children).forEach((btn, i) => {
+          btn.disabled = true;
+          if (minesData[i]) btn.textContent = "💣";
+        });
+      } else {
+        cell.textContent = "✅";
+        cell.disabled = true;
+        revealedCells++;
+        const profit = bet * (1 + revealedCells * 0.2);
+        resultEl.innerHTML = `✅ Casinhas seguras: ${revealedCells} - Ganhos atuais: R$${profit.toFixed(2)} <button onclick="withdrawMines(${profit.toFixed(2)})">Retirar</button>`;
+      }
     }
 
-    function startAviatorGame() {
-      const bet = parseFloat(document.getElementById("aviator-bet").value);
-      const resultEl = document.getElementById("aviator-result");
-      if (isNaN(bet) || bet <= 0) return resultEl.innerHTML = "Digite um valor válido.";
-      if (bet > users[currentUser].balance) return resultEl.innerHTML = "Saldo insuficiente!";
-      const multiplier = (Math.random() * 10 + 1).toFixed(2);
-      const resultAmount = bet * multiplier;
-      users[currentUser].balance = users[currentUser].balance - bet + resultAmount;
-      resultEl.innerHTML = `✈️ O avião subiu até x${multiplier}!<br>Você ganhou R$${resultAmount.toFixed(2)}!`;
+    function withdrawMines(amount) {
+      users[currentUser].balance += parseFloat(amount);
       document.getElementById("balance").textContent = users[currentUser].balance.toFixed(2);
+      document.getElementById("mines-result").innerHTML = `🎉 Você retirou R$${parseFloat(amount).toFixed(2)}!`;
+      Array.from(document.getElementById("mines-board").children).forEach(btn => btn.disabled = true);
     }
   </script>
 </body>
