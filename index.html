@@ -50,7 +50,14 @@
       border-top: 2px solid #0f0;
       margin-top: 2rem;
     }
-    .mines-grid, .roleta-grid {
+    .mines-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 50px);
+      grid-gap: 10px;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+    .roleta-grid {
       display: grid;
       grid-template-columns: repeat(3, 50px);
       grid-gap: 10px;
@@ -131,9 +138,96 @@
   </div>
 
   <script>
-    // (todo o script permanece igual, apenas altere no girarRoleta para pegar valor do input)
-    // dentro da função girarRoleta:
-    // const aposta = parseFloat(document.getElementById("roleta-bet").value) || 10;
+    let users = JSON.parse(localStorage.getItem("users") || "{}");
+    let currentUser = null;
+
+    function login() {
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+      if (!users[username]) {
+        users[username] = { password, balance: 1000 };
+      } else if (users[username].password !== password) {
+        document.getElementById("login-status").textContent = "Senha incorreta";
+        return;
+      }
+      currentUser = username;
+      localStorage.setItem("users", JSON.stringify(users));
+      updateUI();
+    }
+
+    function updateUI() {
+      if (currentUser) {
+        document.getElementById("username-display").textContent = currentUser;
+        document.getElementById("balance").textContent = users[currentUser].balance.toFixed(2);
+      }
+    }
+
+    // Mines
+    let minePositions = [];
+    let revealedCells = 0;
+    function startMinesGame() {
+      const grid = document.getElementById("mines-grid");
+      grid.innerHTML = "";
+      revealedCells = 0;
+      const mineCount = parseInt(document.getElementById("mine-count").value);
+      minePositions = Array(25).fill(false);
+      for (let i = 0; i < mineCount; i++) {
+        let pos;
+        do { pos = Math.floor(Math.random() * 25); } while (minePositions[pos]);
+        minePositions[pos] = true;
+      }
+      for (let i = 0; i < 25; i++) {
+        const cell = document.createElement("div");
+        cell.className = "cell";
+        cell.onclick = () => {
+          if (cell.classList.contains("revealed")) return;
+          if (minePositions[i]) {
+            cell.textContent = "💥";
+            alert("Você perdeu!");
+            startMinesGame();
+            return;
+          }
+          cell.classList.add("revealed");
+          revealedCells++;
+          users[currentUser].balance += 5 * revealedCells;
+          updateUI();
+        };
+        grid.appendChild(cell);
+      }
+    }
+    function withdrawMines() {
+      alert("Retirada realizada!");
+      startMinesGame();
+    }
+
+    // Roleta
+    function girarRoleta() {
+      const aposta = parseFloat(document.getElementById("roleta-bet").value) || 10;
+      if (users[currentUser].balance < aposta) return alert("Saldo insuficiente");
+      users[currentUser].balance -= aposta;
+      const mult = [0, 0.5, 2][Math.floor(Math.random() * 3)];
+      document.getElementById("roleta-mult").textContent = mult + "x";
+      if (mult > 0) users[currentUser].balance += aposta * mult;
+      updateUI();
+    }
+
+    // Aviator
+    let aviatorInterval;
+    function startAviator() {
+      let mult = 1.0;
+      const span = document.getElementById("aviator-mult");
+      clearInterval(aviatorInterval);
+      aviatorInterval = setInterval(() => {
+        mult += 0.1;
+        span.textContent = mult.toFixed(2) + "x";
+        if (Math.random() < 0.01) {
+          alert("Avião caiu! 😢");
+          clearInterval(aviatorInterval);
+        }
+      }, 200);
+    }
+
+    updateUI();
   </script>
 </body>
 </html>
