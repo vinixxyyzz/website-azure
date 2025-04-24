@@ -164,3 +164,147 @@
   </script>
 </body>
 </html>
+
+// Código HTML intacto acima...
+
+<audio id="sound-win" src="https://cdn.pixabay.com/audio/2022/03/15/audio_42b29f6942.mp3"></audio>
+<audio id="sound-lose" src="https://cdn.pixabay.com/audio/2022/03/15/audio_9dfe2f41e3.mp3"></audio>
+<audio id="sound-click" src="https://cdn.pixabay.com/audio/2022/03/15/audio_84df1a6a91.mp3"></audio>
+
+<style>
+  .animate-glow {
+    animation: glow 1s ease-in-out infinite alternate;
+  }
+
+  @keyframes glow {
+    from {
+      box-shadow: 0 0 5px #0f0, 0 0 10px #0f0;
+    }
+    to {
+      box-shadow: 0 0 20px #0f0, 0 0 30px #0f0;
+    }
+  }
+
+  .sparkle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: yellow;
+    border-radius: 50%;
+    pointer-events: none;
+    animation: sparkle 1s ease-out forwards;
+  }
+
+  @keyframes sparkle {
+    0% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(2) translateY(-20px); }
+  }
+</style>
+
+<script>
+function playSound(id) {
+  const sound = document.getElementById(id);
+  if (sound) {
+    sound.currentTime = 0;
+    sound.play();
+  }
+}
+
+function addGlowEffect(el) {
+  el.classList.add("animate-glow");
+  setTimeout(() => el.classList.remove("animate-glow"), 1000);
+}
+
+function showSparkle(x, y) {
+  const sparkle = document.createElement("div");
+  sparkle.classList.add("sparkle");
+  sparkle.style.left = `${x}px`;
+  sparkle.style.top = `${y}px`;
+  document.body.appendChild(sparkle);
+  setTimeout(() => sparkle.remove(), 1000);
+}
+
+function startRoleta() {
+  const bet = parseFloat(document.getElementById("roleta-bet").value);
+  const resultEl = document.getElementById("roleta-result");
+  const button = document.querySelector("button[onclick='startRoleta()']");
+
+  if (isNaN(bet) || bet <= 0) {
+    resultEl.innerHTML = "Valor inválido.";
+    return;
+  }
+
+  if (bet > users[currentUser].balance) {
+    resultEl.innerHTML = "Saldo insuficiente!";
+    return;
+  }
+
+  users[currentUser].balance -= bet;
+  document.getElementById("balance").textContent = users[currentUser].balance.toFixed(2);
+  playSound("sound-click");
+  addGlowEffect(button);
+  showSparkle(button.offsetLeft + 50, button.offsetTop);
+
+  const resultado = Math.random();
+  let ganho = 0;
+  if (resultado < 0.2) {
+    ganho = bet * 5;
+    resultEl.innerHTML = `🎉 Você ganhou R$${ganho.toFixed(2)} na roleta do Tigrinho!`;
+    playSound("sound-win");
+  } else {
+    resultEl.innerHTML = `😿 Você perdeu na roleta.`;
+    playSound("sound-lose");
+  }
+
+  users[currentUser].balance += ganho;
+  document.getElementById("balance").textContent = users[currentUser].balance.toFixed(2);
+}
+
+function startAviator() {
+  const bet = parseFloat(document.getElementById("aviator-bet").value);
+  const statusEl = document.getElementById("aviator-status");
+  const button = document.querySelector("button[onclick='startAviator()']");
+
+  if (isNaN(bet) || bet <= 0) {
+    statusEl.innerHTML = "Valor inválido.";
+    return;
+  }
+
+  if (bet > users[currentUser].balance) {
+    statusEl.innerHTML = "Saldo insuficiente!";
+    return;
+  }
+
+  users[currentUser].balance -= bet;
+  document.getElementById("balance").textContent = users[currentUser].balance.toFixed(2);
+  playSound("sound-click");
+  addGlowEffect(button);
+  showSparkle(button.offsetLeft + 50, button.offsetTop);
+
+  aviatorMultiplier = 1;
+  statusEl.innerHTML = `✈️ Mult: ${aviatorMultiplier.toFixed(2)}x <button onclick="retirarAviator(${bet})">Retirar</button>`;
+
+  aviatorInterval = setInterval(() => {
+    aviatorMultiplier += 0.1;
+    if (Math.random() < 0.05 + aviatorMultiplier / 50) {
+      clearInterval(aviatorInterval);
+      statusEl.innerHTML += "<br>💥 Avião caiu! Você perdeu.";
+      playSound("sound-lose");
+      return;
+    }
+    statusEl.innerHTML = `✈️ Mult: ${aviatorMultiplier.toFixed(2)}x <button onclick="retirarAviator(${bet})">Retirar</button>`;
+  }, 500);
+}
+
+function retirarAviator(bet) {
+  clearInterval(aviatorInterval);
+  const ganho = bet * aviatorMultiplier;
+  users[currentUser].balance += ganho;
+  document.getElementById("balance").textContent = users[currentUser].balance.toFixed(2);
+  document.getElementById("aviator-status").innerHTML = `🎉 Você retirou R$${ganho.toFixed(2)}!`;
+  playSound("sound-win");
+}
+</script>
+
+</body>
+</html>
