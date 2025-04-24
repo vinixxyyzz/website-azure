@@ -74,7 +74,7 @@
       border: 1px solid #0f0;
       cursor: pointer;
     }
-    .cell.revealed, .roleta-cell.active {
+    .cell.revealed {
       background-color: #0f0;
       color: #000;
       font-weight: bold;
@@ -166,9 +166,9 @@
       }
     }
 
-    // Mines
     let minePositions = [];
     let revealedCells = 0;
+
     function startMinesGame() {
       const grid = document.getElementById("mines-grid");
       grid.innerHTML = "";
@@ -188,10 +188,11 @@
           if (minePositions[i]) {
             cell.classList.add("bomb");
             cell.textContent = "💣";
-            alert("Você perdeu!");
+            setTimeout(() => startMinesGame(), 1000);
             return;
           }
           cell.classList.add("revealed");
+          cell.textContent = "💎";
           revealedCells++;
           users[currentUser].balance += 5 * revealedCells;
           updateUI();
@@ -205,7 +206,6 @@
       startMinesGame();
     }
 
-    // Roleta
     function girarRoleta() {
       const aposta = parseFloat(document.getElementById("roleta-bet").value) || 10;
       if (!currentUser || users[currentUser].balance < aposta) return alert("Saldo insuficiente");
@@ -216,7 +216,6 @@
       updateUI();
     }
 
-    // Aviator
     let aviatorInterval;
     function startAviator() {
       let mult = 1.0;
