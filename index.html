@@ -184,7 +184,7 @@
         const cell = document.createElement("div");
         cell.className = "cell";
         cell.onclick = () => {
-          if (cell.classList.contains("revealed") || cell.classList.contains("bomb")) return;
+          if (!currentUser || cell.classList.contains("revealed") || cell.classList.contains("bomb")) return;
           if (minePositions[i]) {
             cell.classList.add("bomb");
             cell.textContent = "💣";
@@ -208,7 +208,7 @@
     // Roleta
     function girarRoleta() {
       const aposta = parseFloat(document.getElementById("roleta-bet").value) || 10;
-      if (users[currentUser].balance < aposta) return alert("Saldo insuficiente");
+      if (!currentUser || users[currentUser].balance < aposta) return alert("Saldo insuficiente");
       users[currentUser].balance -= aposta;
       const mult = [0, 0.5, 2][Math.floor(Math.random() * 3)];
       document.getElementById("roleta-mult").textContent = mult + "x";
