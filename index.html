@@ -170,11 +170,13 @@
 
     let minePositions = [];
     let revealedCells = 0;
+    let accumulatedWinnings = 0;
 
     function startMinesGame() {
       const grid = document.getElementById("mines-grid");
       grid.innerHTML = "";
       revealedCells = 0;
+      accumulatedWinnings = 0;
       const mineCount = parseInt(document.getElementById("mine-count").value);
       const aposta = parseFloat(document.getElementById("mines-bet").value) || 10;
       if (!currentUser || users[currentUser].balance < aposta) return alert("Saldo insuficiente");
@@ -186,6 +188,7 @@
         do { pos = Math.floor(Math.random() * 25); } while (minePositions[pos]);
         minePositions[pos] = true;
       }
+
       for (let i = 0; i < 25; i++) {
         const cell = document.createElement("div");
         cell.className = "cell";
@@ -194,14 +197,15 @@
           if (minePositions[i]) {
             cell.classList.add("bomb");
             cell.textContent = "💣";
+            alert(`Você perdeu! Lucro acumulado: R$${accumulatedWinnings.toFixed(2)}`);
+            accumulatedWinnings = 0;
             setTimeout(() => startMinesGame(), 1000);
             return;
           }
           cell.classList.add("revealed");
           cell.textContent = "💎";
           revealedCells++;
-          users[currentUser].balance += aposta * 0.3;
-          updateUI();
+          accumulatedWinnings += aposta * 0.3;
         };
         grid.appendChild(cell);
       }
@@ -209,8 +213,14 @@
     }
 
     function withdrawMines() {
-      alert("Retirada realizada!");
-      startMinesGame();
+      if (accumulatedWinnings > 0) {
+        alert(`Você retirou R$${accumulatedWinnings.toFixed(2)}!`);
+        users[currentUser].balance += accumulatedWinnings;
+        accumulatedWinnings = 0;
+        updateUI();
+      } else {
+        alert("Nada para retirar.");
+      }
     }
 
     function girarRoleta() {
@@ -218,7 +228,7 @@
       if (!currentUser || users[currentUser].balance < aposta) return alert("Saldo insuficiente");
       users[currentUser].balance -= aposta;
       const mult = [0, 0.5, 2][Math.floor(Math.random() * 3)];
-      document.getElementById("roleta-mult").textContent = mult + "x";
+      document.getElementById("roleta-mult").textContent = mult.toFixed(2) + "x";
       if (mult > 0) users[currentUser].balance += aposta * mult;
       updateUI();
     }
